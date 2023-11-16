@@ -18,9 +18,6 @@ function keydownHandler(event) {
     if (event.code === "ArrowRight") {
         player[0].right = true;
     }
-    if (event.code === "ArrowDown") {
-        player[0].down = true;
-    }
 }
 
 function keyupHandler(event) {
@@ -33,15 +30,13 @@ function keyupHandler(event) {
     if (event.code === "ArrowRight") {
         player[0].right = false;
     }
-    if (event.code === "ArrowDown") {
-        player[0].down = false;
-    }
 }
 
 // Global Variables
 
 // Reset Variables
 let walls;
+let triggers;
 let player;
 
 reset();
@@ -63,6 +58,11 @@ function animate() {
     draw(player, 0);
     playerMovement();
 
+    // Camera Movement Triggers
+    for (let i = 0; i < triggers.length; i++) {
+        checkTriggers();
+    }
+    
     // Request Animation Frame
     requestAnimationFrame(animate);
 }
@@ -73,18 +73,39 @@ function draw(shape, n) {
 }
 
 function playerMovement() {
+   playercontrols();
+   player[0].yV += player[0].yAccel;
+   player[0].y += player[0].yV;
 
+    if (player[0].yV > 10) {
+        player[0].yV = 10;
+    } else if (player[0].yV < -10) {
+        player[0].yV = -10;
+    }
+}
+
+function playercontrols() {
+    if (player[0].up === true) {
+        player[0].yV = -10;
+    }
+    if (player[0].left === true) {
+        player[0].x -= player[0].xV;
+    }
+    if (player[0].right === true) {
+        player[0].x += player[0].xV;
+    }
 }
 
 function checkCollision(n) {
+    // Wall Detection
     // Top Detection
-    if (player[0].y < walls[n].y + walls[n].h && player[0].y > walls[n].y && player[0].x + player[0].v < walls[n].x + walls[n].w && player[0].x + player[0].w - player[0].v > walls[n].x) {
-        player[0].y = walls[n].y;
+    if (player[0].y < walls[n].y + walls[n].h && player[0].y > walls[n].y && player[0].x + player[0].xV < walls[n].x + walls[n].w && player[0].x + player[0].w - player[0].xV > walls[n].x) {
+        player[0].y = walls[n].y - player[0].h;
     }
     // Bottom Detection
-    if (player[0].y + player[0].h > walls[n].y && player[0].y + player[0].h < walls[n].y + walls[n].h && player[0].x + player[0].v < walls[n].x + walls[n].w && player[0].x + player[0].w - player[0].v > walls[n].x) {
+    if (player[0].y + player[0].h > walls[n].y && player[0].y + player[0].h < walls[n].y + walls[n].h && player[0].x + player[0].xV < walls[n].x + walls[n].w && player[0].x + player[0].w - player[0].xV > walls[n].x) {
         player[0].y = walls[n].y - player[0].h;
-        player[0].canJump = true;
+        player[0].yV = 0;
     }
     // Left Detection
     if (player[0].x < walls[n]. x + walls[n].w && player[0].x > walls[n].x && player[0].y < walls[n].y + walls[n].h && player[0].y + player[0].h > walls[n].y) {
@@ -94,28 +115,37 @@ function checkCollision(n) {
     if (player[0].x + player[0].w > walls[n]. x && player[0].x + player[0].w  < walls[n].x + walls[n].w && player[0].y < walls[n].y + walls[n].h && player[0].y + player[0].h > walls[n].y) {
         player[0].x = walls[n].x - player[0].w;
     }
-}
 
-function moveCircles(n) {
-    if (circles[n].xVelocity === 0) {
-        circles[n].xVelocity = randomInt(-5, 5);
+    // Canvas Borders
+    if (player[0].x < 0) {
+        player[0].x = 0;
     }
-    if (circles[n].yVelocity === 0) {
-        circles[n].yVelocity = randomInt(-5, 5);
-    }
-
-    circles[n].x += circles[n].xVelocity;
-    circles[n].y += circles[n].yVelocity;
-
-    if (circles[n].x + circles[n].r > cnv.width || circles[n].x - circles[n].r < 0) {
-        circles[n].xVelocity = circles[n].xVelocity * -1;
-    }
-    if (circles[n].y + circles[n].r > cnv.height || circles[n].y - circles[n].r < 0) {
-        circles[n].yVelocity = circles[n].yVelocity * -1;
+    if (player[0].x + player[0].w > cnv.width) {
+        player[0].x = cnv.width - player[0].w;
     }
 }
 
-function newPlayer(x1, y1, w1, h1, color1, up1, left1, right1, down1, xV1, yV1, yAccel1, canJump1) {
+function checkTriggers(n) {
+    // Trigger Detection
+    if (player[0].x + player[0].w > triggers[n].x) {
+        triggers[n].state = true;
+    }
+
+    if (player[0].x + player[0].w / 2 > cnv.width / 2) {
+        for (let i = 0; i < walls.length; i++) {
+            walls[i].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
+        }
+        player[0].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
+    }
+    if (player[0].x + player[0].w / 2 < cnv.width / 2) {
+        for (let i = 0; i < walls.length; i++) {
+            walls[i].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
+        }
+        player[0].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
+    }
+}
+
+function newPlayer(x1, y1, w1, h1, color1, up1, left1, right1, xV1, yV1, yAccel1) {
     return {
             x: x1,
             y: y1,
@@ -125,12 +155,10 @@ function newPlayer(x1, y1, w1, h1, color1, up1, left1, right1, down1, xV1, yV1, 
             up: up1,
             left: left1,
             right: right1,
-            down: down1,
             xV: xV1,
             yV: yV1,
-            yAccel: yAccel1,
-            canJump: canJump1
-        } 
+            yAccel: yAccel1
+    } 
 }
 
 function newWall(x1, y1, w1, h1, color1) {
@@ -140,7 +168,14 @@ function newWall(x1, y1, w1, h1, color1) {
             w: w1,
             h: h1,
             color: color1
-        }
+    }
+}
+
+function newTrigger(x1, state1) {
+    return {
+        x: x1,
+        state: state1
+    }
 }
 
 function reset() {
@@ -148,6 +183,9 @@ function reset() {
     walls.push(newWall(0, cnv.height - 20, 1950, 20, "grey"));
     walls.push(newWall(520, cnv.height / 2, 150, 20, "grey"));
 
+    triggers = [];
+    triggers.push(newTrigger(cnv.width / 2, false));
+
     player = [];
-    player.push(newPlayer(50, cnv.height / 2, 20, 20, "blue", false, false, false, false, 5, 5, 1, false));
+    player.push(newPlayer(50, cnv.height / 2, 20, 20, "blue", false, false, false, 5, 0, 1));
 }
