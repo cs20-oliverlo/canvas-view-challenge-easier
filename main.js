@@ -59,9 +59,7 @@ function animate() {
     playerMovement();
 
     // Camera Movement Triggers
-    for (let i = 0; i < triggers.length; i++) {
-        checkTriggers();
-    }
+    checkTriggers();
     
     // Request Animation Frame
     requestAnimationFrame(animate);
@@ -125,23 +123,35 @@ function checkCollision(n) {
     }
 }
 
-function checkTriggers(n) {
-    // Trigger Detection
-    if (player[0].x + player[0].w > triggers[n].x) {
-        triggers[n].state = true;
+function checkTriggers() {
+    for (let i = 0; i < triggers.length; i++) {
+        // Trigger Detection
+        if (player[0].x + player[0].w / 2 > triggers[i].x) {
+            triggers[i].state = true;
+        } else {
+            triggers[i].state = false;
+        }
     }
 
-    if (player[0].x + player[0].w / 2 > cnv.width / 2) {
-        for (let i = 0; i < walls.length; i++) {
-            walls[i].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
+    if (triggers[0].state === true && triggers[1].state !== true) {
+        if (player[0].x + player[0].w / 2 > cnv.width / 2) {
+            for (let i = 0; i < walls.length; i++) {
+                walls[i].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
+            }
+            for (let i = 0; i < triggers.length; i++) {
+                triggers[i].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
+            }
+            player[0].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
         }
-        player[0].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
-    }
-    if (player[0].x + player[0].w / 2 < cnv.width / 2) {
-        for (let i = 0; i < walls.length; i++) {
-            walls[i].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
+        if (player[0].x + player[0].w / 2 < cnv.width / 2) {
+            for (let i = 0; i < walls.length; i++) {
+                walls[i].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
+            }
+            for (let i = 0; i < triggers.length; i++) {
+                triggers[i].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
+            }
+            player[0].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
         }
-        player[0].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
     }
 }
 
@@ -181,10 +191,20 @@ function newTrigger(x1, state1) {
 function reset() {
     walls = [];
     walls.push(newWall(0, cnv.height - 20, 1950, 20, "grey"));
-    walls.push(newWall(520, cnv.height / 2, 150, 20, "grey"));
+
+    let n = 520;
+    for (let i = 0; i < 6; i++) {
+        if (i % 2 === 0) {
+            walls.push(newWall(n, cnv.height / 2, 150, 20, "grey"));
+        } else {
+            walls.push(newWall(n, (cnv.height / 2) + 100, 150, 20, "grey"));
+        }
+        n += 200;
+    }
 
     triggers = [];
     triggers.push(newTrigger(cnv.width / 2, false));
+    triggers.push(newTrigger(1950 - cnv.width / 2, false));
 
     player = [];
     player.push(newPlayer(50, cnv.height / 2, 20, 20, "blue", false, false, false, 5, 0, 1));
