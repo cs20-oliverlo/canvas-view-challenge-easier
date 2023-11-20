@@ -133,7 +133,9 @@ function checkTriggers() {
         }
     }
 
-    if (triggers[0].state === true && triggers[1].state !== true) {
+    if (triggers[1].state == true) {
+        // Stops the "camera" from moving past the end of the platform
+    } else if (triggers[0].state === true) {
         if (player[0].x + player[0].w / 2 > cnv.width / 2) {
             for (let i = 0; i < walls.length; i++) {
                 walls[i].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
