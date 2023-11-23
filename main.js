@@ -35,8 +35,8 @@ function keyupHandler(event) {
 // Global Variables
 
 // Reset Variables
-let walls;
 let player;
+let walls;
 let camera;
 
 reset();
